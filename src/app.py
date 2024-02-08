@@ -43,26 +43,42 @@ def handle_hello():
     return jsonify(response_body), 200
 
 
-@app.route('/members', methods=['GET'])
-def get_all_members():
-    members = jackson_family.get_all_members()
-    return jsonify(members), 200
-
-
+#Para hacer un get de un miembro concreto, sería la misma ruta que uso para añadir, ya que especifico
+#al final de la ruta el id del miembro con la información que quiero ver
 @app.route('/member/<int:member_id>', methods=['GET'])
 def get_member(member_id):
     member = jackson_family.get_member(member_id)
+    #Si el miembro existe, devuelvo su información, sino un error
     if member:
         return jsonify(member), 200
     else:
-        raise APIException("Member not found", status_code=400)
+        raise APIException("El miembro no existe", status_code=400)
 
+@app.route('/member', methods=['POST'])
+def add_member():
+    #Recojo la request (en este caso la petición que envio desde postman) y la guardo en data
+    data = request.json
+    #Paso data a la función add_member
+    jackson_family.add_member(data)
+    #Devuelvo el contenido de data dentro de jsonify para poder visualizarlo al hacer la petición
+    return jsonify(data), 200
 
 @app.route('/member/<int:member_id>', methods=['DELETE'])
 def delete_member(member_id):
+    #Como el metodo DELETE no genera un payload, no tiene sentido guardar su respuesta ya que no la voy a usar
+    #asi que directamene paso el id a la función para que se elimine el usuario
     jackson_family.delete_member(member_id)
-    return jsonify({"done": True}), 200
+    #Devuelvo el contenido de data dentro de jsonify para poder visualizarlo al hacer la petición
+    return jsonify("Eliminación correcta"), 200
 
+@app.route('/member/<int:member_id>', methods=['PUT'])
+def update_member(member_id):
+    #Recojo la request (en este caso la petición que envio desde postman) y la guardo en data
+    data = request.json
+    #Paso el id recibido y los datos del miembro
+    jackson_family.update_member(member_id, data)
+    #Devuelvo el contenido de data dentro de jsonify para poder visualizarlo al hacer la petición
+    return jsonify("Actualización correcta"), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
